@@ -3,7 +3,6 @@ body {
     margin: 0;
     overflow: hidden;
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
     padding: 5px;
@@ -54,7 +53,7 @@ body {
     color: #f6f5f5;
 }
 
-.grid-item.operator {
+.grid-item.operator, #result {
     background-color: #f69908;
     color: #f6f7f7;
 }
