@@ -49,6 +49,7 @@ function clear() {
 
 function inputNumber(e) {
     const number = e.target.innerText;
+    if (number == '.') return; //ignore delimiter
     if (formula.op == null) {
         if (formula.n1 == '' && number == '0') return; //prevent trailing zero
         formula.n1 += number;
