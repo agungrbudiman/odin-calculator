@@ -24,37 +24,41 @@ function divide(n1, n2) {
 
 function operate() {
     if (formula.op == null) return; //ignore equal button when operand empty
+    let result = 0;
     if (formula.op == 'divide' && formula.n2 == '0') {
-        alert("You can't divide by zero!");
-        updateDisplay(formula.n1, -2); //update display with latest result
-        formula.n2 = '';
-        return false;
+        result = 'NaN';
+        formula.n1 = '';
     }
     else {
-        const result = window[formula.op](formula.n1, formula.n2);
-        const roundedResult = +result.toPrecision(9);
+        if (formula.n1 == '') formula.n1 = formula.n2; // *6 same as 6*6, follow mac/ios calc behavior
+        result = window[formula.op](formula.n1, formula.n2);
+        result = +result.toPrecision(9);
         formula.n1 = result;
-        formula.n2 = '';
-        formula.op = null;
-        updateDisplay(roundedResult, -2);
-        return result;
     }
+    formula.n2 = '';
+    formula.op = null;
+    clearDisplay();
+    updateDisplay(result);
+    return result;
 }
 
-function updateDisplay(string, option=0) {
-    if (option == -1) {
-        displayData = '';
-        display.innerText = '0';
-        return;
-    }
-    if (option == -2) displayData = '';
-    if (option == -3) displayData = displayData.slice(0, -1); //remove last character
+function updateDisplay(string) {
     displayData += string;
     display.innerText = displayData;
 }
 
-function clear() {
-    updateDisplay('', -1);
+function clearDisplay() {
+    displayData = "";
+    display.innerText = "0";
+}
+
+function trimLastDisplay() {
+    displayData = displayData.slice(0, -1);
+    display.innerText = displayData;
+}
+
+function clearMemory() {
+    clearDisplay();
     formula.n1 = '';
     formula.n2 = '';
     formula.op = null;
@@ -63,12 +67,10 @@ function clear() {
 function inputNumber(e) {
     const number = e.target.innerText;
     if (number == '.') return; //ignore delimiter
-    if (formula.op == null) { //left number
-        if (formula.n1 == '' && number == '0') return; //prevent multiple zero
+    if (formula.op == null) { //left operand
+        if (formula.n1 == '' && number == '0') return; //prevent trailing zero
         formula.n1 += number;
-    } else { //right number
-        if (formula.n2 == '0' && number == '0') return; //allow zero once
-        if (formula.n2 == '0' && number != '0') updateDisplay('', -3); //remove trailing zero
+    } else { //right operand
         formula.n2 += number;
     } 
     updateDisplay(e.target.innerText);
@@ -76,9 +78,8 @@ function inputNumber(e) {
 }
 
 function inputOperator(e) {
-    const operator = e.target.getAttribute('data-function');
-    if (formula.n1 == '') return; //ignore operator button when operand empty
-    if (formula.op != null) operate(); // 2nd.. chain
+    if (formula.op != null && formula.n2 != '') operate(); // 2nd, 3rd... chain
+    if (formula.op != null && formula.n1 != '') trimLastDisplay(); //support operator change
     formula.op = e.target.getAttribute('data-function');
     updateDisplay(e.target.innerText);
     console.log(formula);
@@ -91,4 +92,4 @@ const btnClear = document.querySelector("#clear");
 btnNumbers.forEach(btnNumber => btnNumber.addEventListener('click', inputNumber));
 btnOperators.forEach(btnOperator => btnOperator.addEventListener('click', inputOperator));
 btnResult.addEventListener('click', operate);
-btnClear.addEventListener('click', clear);
+btnClear.addEventListener('click', clearMemory);

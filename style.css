@@ -48,6 +48,10 @@ body {
     font-size: 28px;
 }
 
+.grid-item:active {
+    background-color: aqua !important;
+}
+
 .grid-item.number {
     background-color: #313131;
     color: #f6f5f5;
