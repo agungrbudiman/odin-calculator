@@ -23,21 +23,34 @@ function divide(n1, n2) {
 }
 
 function operate() {
-    if (formula.op == null) return;
-    const result = window[formula.op](formula.n1, formula.n2);
-    const roundedResult = +result.toPrecision(9);
-    formula.n1 = result;
-    formula.n2 = '';
-    formula.op = null;
-    updateDisplay(roundedResult, true);
-    return result;
+    if (formula.op == null) return; //ignore equal button when operand empty
+    if (formula.op == 'divide' && formula.n2 == '0') {
+        alert("You can't divide by zero!");
+        updateDisplay(formula.n1, -2); //update display with latest result
+        formula.n2 = '';
+        return false;
+    }
+    else {
+        const result = window[formula.op](formula.n1, formula.n2);
+        const roundedResult = +result.toPrecision(9);
+        formula.n1 = result;
+        formula.n2 = '';
+        formula.op = null;
+        updateDisplay(roundedResult, -2);
+        return result;
+    }
 }
 
-function updateDisplay(string, clear=false) {
-    if (clear) displayData = "";
+function updateDisplay(string, option=0) {
+    if (option == -1) {
+        displayData = '';
+        display.innerText = '0';
+        return;
+    }
+    if (option == -2) displayData = '';
+    if (option == -3) displayData = displayData.slice(0, -1); //remove last character
     displayData += string;
     display.innerText = displayData;
-    if (clear == -1) display.innerText = '0';
 }
 
 function clear() {
@@ -50,11 +63,12 @@ function clear() {
 function inputNumber(e) {
     const number = e.target.innerText;
     if (number == '.') return; //ignore delimiter
-    if (formula.op == null) {
-        if (formula.n1 == '' && number == '0') return; //prevent trailing zero
+    if (formula.op == null) { //left number
+        if (formula.n1 == '' && number == '0') return; //prevent multiple zero
         formula.n1 += number;
-    } else {
-        if (formula.n2 == '' && number == '0') return; //prevent trailing zero
+    } else { //right number
+        if (formula.n2 == '0' && number == '0') return; //allow zero once
+        if (formula.n2 == '0' && number != '0') updateDisplay('', -3); //remove trailing zero
         formula.n2 += number;
     } 
     updateDisplay(e.target.innerText);
@@ -63,6 +77,7 @@ function inputNumber(e) {
 
 function inputOperator(e) {
     const operator = e.target.getAttribute('data-function');
+    if (formula.n1 == '') return; //ignore operator button when operand empty
     if (formula.op != null) operate(); // 2nd.. chain
     formula.op = e.target.getAttribute('data-function');
     updateDisplay(e.target.innerText);
