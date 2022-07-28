@@ -3,6 +3,7 @@ let formula = {
     n1: "",
     n2: "",
     op: null,
+    text: "",
 };
 let displayData = "";
 
@@ -82,6 +83,7 @@ function clearMemory(e) {
         formula.n1 = '';
         formula.n2 = '';
         formula.op = null;
+        formula.text = '';
     }
     else if (func == 'C'){
         const lastChar = displayData.slice(-1);
@@ -130,6 +132,7 @@ function inputOperator(e) {
 }
 
 function percentage() {
+    if (formula.n1 == '') return;
     if (formula.op == 'add' || formula.op == 'subtract') { // 1000 + 50% = 1000 + 500 ; 1000 * 10% = 1000 * 0.1
         const result = formula.n1 * formula.n2 / 100;
         updateDisplay(formula.text+result, formula.text+formula.n2);
