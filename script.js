@@ -22,6 +22,10 @@ function divide(n1, n2) {
     return n1 / n2;
 }
 
+function leadingZeros(number) { // 0.0004342 return -3 - https://stackoverflow.com/a/31002148
+    return Math.floor( Math.log10(number) + 1);
+}
+
 function operate() {
     if (formula.op == null) return; //ignore equal button when operand empty
     let result = 0;
@@ -32,7 +36,13 @@ function operate() {
     else {
         if (formula.n1 == '') formula.n1 = formula.n2; // *6 same as 6*6, follow mac/ios calc behavior
         result = window[formula.op](formula.n1, formula.n2);
-        result = +result.toPrecision(9);
+        const ld = leadingZeros(result);
+        if (ld <= 0) {
+            result = +result.toPrecision(8+ld); // 10 digit minus 2 digit of 0.
+        }
+        else {
+            result = +result.toPrecision(9); // 10 digit minus 1 digit of .
+        }
         formula.n1 = result;
     }
     formula.n2 = '';
@@ -71,6 +81,8 @@ function inputNumber(e) {
         if (formula.n1 == '' && number == '0') return; //prevent trailing zero
         formula.n1 += number;
     } else { //right operand
+        if (formula.n2 == '0' && number == '0') return; //prevent trailing zero, allow once
+        if (formula.n2 == '0' && number != '0') trimLastDisplay(); //remove zero
         formula.n2 += number;
     } 
     updateDisplay(e.target.innerText);
