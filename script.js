@@ -1,10 +1,6 @@
 const display = document.querySelector("#display");
-let formula = {
-    n1: "",
-    n2: "",
-    op: "",
-    text: "",
-};
+let formula = { n1: '', n2: '', op: '', text: '' };
+const opmap = { '/': 'divide', '*': 'multiply', '-': 'subtract', '+': 'add' };
 
 function add(n1, n2) { return +n1 + +n2 }
 
@@ -34,7 +30,7 @@ function roundNumber(number) {
 
 function operate(e) {
     if (formula.op == '') return; //ignore when operator empty
-    if (formula.op != '' && formula.n2 == '') return; //ignore operator without minimum single operand
+    if (formula.op != '' && formula.n2 == '') return; //ignore without minimum single operand
     if (formula.n1 == '') formula.n1 = formula.n2; // *6 same as 6*6, follow mac/ios calc behavior
     const result = window[formula.op](formula.n1, formula.n2);
     clearMemory();
@@ -50,31 +46,28 @@ function updateDisplay() {
 }
 
 function clearMemory() {
-    formula.n1 = '';
-    formula.n2 = '';
-    formula.op = '';
-    formula.text = '';
+    formula = { n1: '', n2: '', op: '', text: '' };
 }
 
 function toggleClear(value) {
     btnClear.innerText = value;
 }
 
-function clear(e) {
-    if (e.target.innerText == 'C') {
+function clear() {
+    if (btnClear.innerText == 'C') {
         formula.n2 = '';
         updateDisplay();
         toggleClear('AC');
     }
-    else if (e.target.innerText == 'AC'){
+    else if (btnClear.innerText == 'AC'){
         clearMemory();
         display.innerText = "0";
     }
 }
 
 
-function inputNumber(e) {
-    const number = e.target.innerText;
+function inputNumber(e, key) {
+    const number = key ?? e.target.innerText;
     const n = formula.op == '' ? 'n1' : 'n2';
     if (formula[n].includes('.') && number == '.') return; //prevent double dot
     if (formula[n] == '0' && number == '0') return; //prevent trailing zero, allow once
@@ -85,10 +78,10 @@ function inputNumber(e) {
     console.log(formula);
 }
 
-function inputOperator(e) {
+function inputOperator(e, key) {
     if (formula.op != '' && formula.n2 != '') operate(); // 2nd, 3rd... chain
-    formula.op = e.target.getAttribute('data-function');
-    formula.text = e.target.innerText;
+    formula.op = opmap[key] ?? opmap[e.target.innerText];
+    formula.text = key ?? e.target.innerText;
     updateDisplay();
     console.log(formula);
 }
@@ -118,6 +111,24 @@ function negative() {
     console.log(formula);
 }
 
+function keyMapping(e) {
+    if (e.key.match(/[0-9.]+/)) {
+        inputNumber(null, e.key);
+    }
+    else if (e.key.match(/[\/\*\-\+]+/)) {
+        inputOperator(null, e.key);
+    }
+    else if (e.key == 'Enter') {
+        operate(true);
+    }
+    else if (e.key == '%') {
+        percentage();
+    }
+    else if (e.key == 'Backspace') {
+        clear();
+    }
+}
+
 const btnNumbers = document.querySelectorAll(".grid-item.number");
 const btnOperators = document.querySelectorAll(".grid-item.operator");
 const btnResult = document.querySelector("#result");
@@ -130,3 +141,4 @@ btnResult.addEventListener('click', operate);
 btnClear.addEventListener('click', clear);
 btnPercentage.addEventListener('click', percentage);
 btnNegative.addEventListener('click', negative);
+document.addEventListener('keydown', keyMapping);
