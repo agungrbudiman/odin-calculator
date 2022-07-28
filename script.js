@@ -23,11 +23,13 @@ function divide(n1, n2) {
 }
 
 function leadingZeros(number) { // 0.0004342 return -3 - https://stackoverflow.com/a/31002148
+    if (number == 0) return 0;
     return Math.floor( Math.log10(number) + 1);
 }
 
-function operate() {
-    if (formula.op == null) return; //ignore equal button when operand empty
+function operate(e) {
+    if (formula.op == null) return; //ignore when operator empty
+    if (formula.op != null && formula.n2 == '') return; //ignore operator without minimum single operand
     let result = 0;
     if (formula.op == 'divide' && formula.n2 == '0') {
         result = 'NaN';
@@ -49,6 +51,7 @@ function operate() {
     formula.op = null;
     clearDisplay();
     updateDisplay(result);
+    if (e) toggleClear('AC');
     return result;
 }
 
@@ -67,11 +70,30 @@ function trimLastDisplay() {
     display.innerText = displayData;
 }
 
-function clearMemory() {
-    clearDisplay();
-    formula.n1 = '';
-    formula.n2 = '';
-    formula.op = null;
+function clearMemory(e) {
+    if (e.target.innerText == 'AC') {
+        clearDisplay();
+        formula.n1 = '';
+        formula.n2 = '';
+        formula.op = null;
+    }
+    else {
+        const lastChar = displayData.slice(-1);
+        if (lastChar.match(/[0-9.]/)) { // delete number and delimiter only
+            trimLastDisplay();
+            if (formula.op == null) { //left operand
+                formula.n1 = formula.n1.slice(0, -1);
+            }
+            else {
+                formula.n2 = formula.n2.slice(0, -1);
+            }
+        }
+    }
+}
+
+function toggleClear(value) {
+    btnClear.innerText = btnClear.innerText == 'AC' ? 'C' : 'AC';
+    if (value) btnClear.innerText = value;
 }
 
 function inputNumber(e) {
@@ -84,14 +106,15 @@ function inputNumber(e) {
         if (formula.n2 == '0' && number == '0') return; //prevent trailing zero, allow once
         if (formula.n2 == '0' && number != '0') trimLastDisplay(); //remove zero
         formula.n2 += number;
-    } 
+    }
     updateDisplay(e.target.innerText);
+    toggleClear('C');
     console.log(formula);
 }
 
 function inputOperator(e) {
     if (formula.op != null && formula.n2 != '') operate(); // 2nd, 3rd... chain
-    if (formula.op != null && formula.n1 != '') trimLastDisplay(); //support operator change
+    if (formula.op != null) trimLastDisplay(); //support operator change
     formula.op = e.target.getAttribute('data-function');
     updateDisplay(e.target.innerText);
     console.log(formula);
