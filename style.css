@@ -35,6 +35,7 @@ body {
     display: flex;
     align-items: center;
     flex-direction: row-reverse;
+    white-space: nowrap;
 }
 
 .grid-item {
@@ -62,7 +63,7 @@ body {
     color: #f6f7f7;
 }
 
-.grid-item.modifier {
+.grid-item.modifier, #clear {
     background-color: #9f9f9f;
     color: #010102;
 }
