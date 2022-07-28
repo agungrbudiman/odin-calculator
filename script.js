@@ -75,17 +75,13 @@ function clear(e) {
 
 function inputNumber(e) {
     const number = e.target.innerText;
-    if (number == '.') return; //ignore delimiter
-    if (formula.op == '') { //left operand
-        if (formula.n1 == '' && number == '0') return; //prevent trailing zero
-        formula.n1 += number;
-    } else { //right operand
-        if (formula.n2 == '0' && number == '0') return; //prevent trailing zero, allow once
-        if (formula.n2 == '0' && number != '0') formula.n2 = ''; //remove trailing zero
-        formula.n2 += number;
-        toggleClear('C');
-    }
+    const n = formula.op == '' ? 'n1' : 'n2';
+    if (formula[n].includes('.') && number == '.') return; //prevent double dot
+    if (formula[n] == '0' && number == '0') return; //prevent trailing zero, allow once
+    if (formula[n] == '0' && number != '0' && number != '.') formula[n] = ''; //remove trailing zero
+    formula[n] += number;
     updateDisplay();
+    if (n == 'n2') toggleClear('C');
     console.log(formula);
 }
 
